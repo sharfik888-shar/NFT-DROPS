@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0b0b0d">
+<title>NFT DROPS</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box}
+:root{color-scheme:dark}
+body{margin:0;background:#0b0b0d;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:88px}
+button{font:inherit;cursor:pointer}
+.app{max-width:520px;margin:auto;padding:20px 17px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:27px}
+.logo{font-size:21px;font-weight:850;letter-spacing:1.5px}
+.logo span{color:#b7a0ff}
+.profile{width:39px;height:39px;border-radius:50%;background:#202024;display:grid;place-items:center;font-size:19px;border:1px solid #343439}
+.label{font-size:11px;letter-spacing:2px;color:#8c8c98;font-weight:700}
+.balance{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#1b1922,#131316);border:1px solid #302b3a;border-radius:20px;padding:19px;margin-bottom:27px}
+.balance h2{font-size:27px;margin:8px 0 0}
+.coin{font-size:30px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:0 0 13px}
+h2{font-size:19px;margin:0}
+.muted{font-size:12px;color:#858590}
+.chests{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chest{background:#141417;border:1px solid #29292f;border-radius:18px;padding:13px 12px 15px;text-align:center;min-width:0}
+.chest-art{height:112px;border-radius:13px;display:grid;place-items:center;margin-bottom:13px;position:relative;overflow:hidden}
+.chest-art:after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;filter:blur(25px);opacity:.3}
+.art1{background:linear-gradient(145deg,#24212e,#141319)}
+.art1:after{background:#9c7aff}
+.art2{background:linear-gradient(145deg,#29251c,#17140f)}
+.art2:after{background:#e5b95c}
+.art3{background:linear-gradient(145deg,#1c2930,#111719)}
+.art3:after{background:#5ad6db}
+.art4{background:linear-gradient(145deg,#301c2d,#181119)}
+.art4:after{background:#ff75c8}
+.chest-emoji{font-size:59px;z-index:1;filter:drop-shadow(0 5px 12px #000)}
+.chest h3{font-size:14px;margin:0 0 5px}
+.chest .muted{margin-bottom:13px;display:block}
+.open{width:100%;border:0;border-radius:11px;padding:11px 5px;background:#f1edff;color:#16121e;font-weight:800;font-size:12px}
+.open:active{transform:scale(.97)}
+.open.gold{background:#ead4a0}
+.open:disabled{opacity:.5}
+.section{margin-top:29px}
+.daily{margin-top:24px;border-radius:17px;background:#151518;border:1px solid #29292f;padding:17px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.daily h3{font-size:14px;margin:0 0 5px}
+.daily p{font-size:12px;color:#92929c;margin:0}
+.claim{background:#292433;color:#d8c8ff;border:1px solid #55466f;border-radius:10px;padding:11px;font-size:12px;font-weight:750;white-space:nowrap}
+.claim:disabled{opacity:.5}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#101012ee;backdrop-filter:blur(16px);border-top:1px solid #28282d;display:flex;justify-content:center;z-index:5;padding:10px 0 max(10px,env(safe-area-inset-bottom))}
+.nav-inner{display:flex;width:100%;max-width:520px;justify-content:space-around}
+.nav button{background:none;border:0;color:#777782;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 15px}
+.nav button b{font-size:21px;font-weight:500}
+.nav button.active{color:#d6c6ff}
+.page{display:none}
+.page.active{display:block}
+.inventory-card{display:flex;align-items:center;gap:13px;background:#151518;border:1px solid #29292f;border-radius:14px;padding:12px;margin-top:10px}
+.item-art{width:62px;height:62px;border-radius:12px;background:#24202e;display:grid;place-items:center;font-size:32px;flex-shrink:0}
+.item-info{flex:1;min-width:0}
+.item-info h3{font-size:14px;margin:0 0 6px}
+.rarity{font-size:11px;color:#bba1ff}
+.rarity.Rare{color:#77c6ff}
+.rarity.Epic{color:#d68bff}
+.rarity.Legendary{color:#f0c975}
+.empty{text-align:center;padding:50px 15px;color:#898994}
+.empty .big{font-size:48px;margin-bottom:15px}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:22px;z-index:10}
+.modal.show{display:flex}
+.modal-box{width:100%;max-width:350px;background:#17171b;border:1px solid #3a3544;border-radius:23px;padding:26px 20px;text-align:center}
+.modal-art{font-size:85px;animation:pop .55s ease}
+.modal-box h2{margin:12px 0}
+.modal-box p{color:#9999a4;font-size:13px;line-height:1.6}
+.modal-box button{width:100%;padding:14px;border:0;border-radius:12px;background:#e7ddff;color:#19131f;font-weight:800;margin-top:12px}
+@keyframes pop{0%{transform:scale(.3) rotate(-15deg);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.note{font-size:11px;color:#6f6f79;text-align:center;line-height:1.5;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+<div class="logo">NFT <span>DROPS</span></div>
+<div class="profile">✦</div>
+</header>
+
+<div class="balance">
+<div>
+<div class="label">ТВОЙ БАЛАНС</div>
+<h2>🪙 <span id="coins">1000</span></h2>
+<div class="muted" style="margin-top:7px">Игровые монеты</div>
+</div>
+<div class="coin">✧</div>
+</div>
+
+<main id="home" class="page active">
+<div class="section-head"><h2>Коллекция сундуков</h2><span class="muted">01 / 04</span></div>
+<div class="chests">
+<div class="chest">
+<div class="chest-art art1"><div class="chest-emoji">🪻</div></div>
+<h3>Violet Drop</h3><span class="muted">Обычный сундук</span>
+<button class="open" onclick="openChest(100,'Violet Drop')">ОТКРЫТЬ · 100 🪙</button>
+</div>
+<div class="chest">
+<div class="chest-art art2"><div class="chest-emoji">👑</div></div>
+<h3>Golden Drop</h3><span class="muted">Золотая серия</span>
+<button class="open gold" onclick="openChest(250,'Golden Drop')">ОТКРЫТЬ · 250 🪙</button>
+</div>
+<div class="chest">
+<div class="chest-art art3"><div class="chest-emoji">💎</div></div>
+<h3>Crystal Drop</h3><span class="muted">Кристальная серия</span>
+<button class="open" onclick="openChest(500,'Crystal Drop')">ОТКРЫТЬ · 500 🪙</button>
+</div>
+<div class="chest">
+<div class="chest-art art4"><div class="chest-emoji">🌸</div></div>
+<h3>Bloom Drop</h3><span class="muted">Цветочная серия</span>
+<button class="open" onclick="openChest(150,'Bloom Drop')">ОТКРЫТЬ · 150 🪙</button>
+</div>
+</div>
+
+<div class="daily">
+<div><h3>Ежедневная награда</h3><p>Забери бесплатные 200 монет</p></div>
+<button class="claim" id="daily" onclick="claimDaily()">ЗАБРАТЬ</button>
+</div>
+<p class="note">Все монеты и предметы — игровые. Они не имеют денежной стоимости.</p>
+</main>
+
+<section id="inventory" class="page">
+<div class="section-head"><h2>Моя коллекция</h2><span class="muted" id="count">0 предметов</span></div>
+<div id="items"></div>
+</section>
+
+<section id="profile" class="page">
+<div class="section-head"><h2>Профиль</h2></div>
+<div class="balance"><div><div class="label">ИГРОК</div><h2 id="username">Collector</h2><div class="muted">Участник NFT DROPS</div></div><div class="coin">✦</div></div>
+<div class="inventory-card"><div class="item-art">🎁</div><div class="item-info"><h3>Открыто сундуков</h3><span class="muted" id="opened">0</span></div></div>
+<div class="inventory-card"><div class="item-art">💎</div><div class="item-info"><h3>Предметов в коллекции</h3><span class="muted" id="total">0</span></div></div>
+</section>
+</div>
+
+<nav class="nav"><div class="nav-inner">
+<button class="active" onclick="showPage('home',this)"><b>⌂</b>Главная</button>
+<button onclick="showPage('inventory',this)"><b>▦</b>Коллекция</button>
+<button onclick="showPage('profile',this)"><b>◉</b>Профиль</button>
+</div></nav>
+
+<div class="modal" id="modal">
+<div class="modal-box">
+<div class="label">NFT DROPS · DROP REVEALED</div>
+<div class="modal-art" id="rewardArt">💎</div>
+<h2 id="rewardName">Crystal</h2>
+<div class="rarity" id="rewardRarity">Rare</div>
+<p id="rewardText">Новый предмет добавлен в коллекцию.</p>
+<button onclick="closeModal()">ЗАБРАТЬ ПРЕДМЕТ</button>
+</div>
+</div>
+
+<script>
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();try{tg.setHeaderColor('#0b0b0d');tg.setBackgroundColor('#0b0b0d')}catch(e){}}
+const defaults={coins:1000,items:[],opened:0,lastDaily:''};
+let state;
+try{state={...defaults,...JSON.parse(localStorage.getItem('nftDropsSave')||'{}')}}catch(e){state={...defaults}}
+const rewards=[
+{name:'Silver Star',art:'🌟',rarity:'Common',weight:48},
+{name:'Moon Crystal',art:'🔮',rarity:'Common',weight:26},
+{name:'Blue Diamond',art:'💎',rarity:'Rare',weight:15},
+{name:'Phantom Crown',art:'👑',rarity:'Epic',weight:8},
+{name:'Golden Butterfly',art:'🦋',rarity:'Legendary',weight:2.7},
+{name:'Void Relic',art:'🌌',rarity:'Mythic',weight:0.3}
+];
+function save(){try{localStorage.setItem('nftDropsSave',JSON.stringify(state))}catch(e){}}
+function render(){
+document.getElementById('coins').textContent=state.coins.toLocaleString('ru-RU');
+document.getElementById('count').textContent=state.items.length+' предметов';
+document.getElementById('opened').textContent=state.opened;
+document.getElementById('total').textContent=state.items.length;
+document.getElementById('username').textContent=tg?.initDataUnsafe?.user?.first_name||'Collector';
+const today=new Date().toISOString().slice(0,10);
+document.getElementById('daily').disabled=state.lastDaily===today;
+document.getElementById('daily').textContent=state.lastDaily===today?'УЖЕ ПОЛУЧЕНО':'ЗАБРАТЬ';
+const list=document.getElementById('items');
+if(!state.items.length){list.innerHTML='<div class="empty"><div class="big">▦</div><h3>Коллекция пуста</h3><p>Открой первый сундук, чтобы найти предмет.</p></div>'}
+else{list.innerHTML=[...state.items].reverse().map(x=>'<div class="inventory-card"><div class="item-art">'+x.art+'</div><div class="item-info"><h3>'+x.name+'</h3><span class="rarity '+x.rarity+'">'+x.rarity+'</span><div class="muted" style="margin-top:5px">'+x.chest+'</div></div></div>').join('')}
+}
+function openChest(cost,chest){
+if(state.coins<cost){alert('Не хватает монет! Забери ежедневную награду.');return}
+state.coins-=cost;
+const pool=rewards.filter(x=>Math.random()*100<100);
+let n=Math.random()*100,acc=0,reward=rewards[0];
+for(const x of rewards){acc+=x.weight;if(n<acc){reward=x;break}}
+const item={...reward,chest,id:Date.now()+Math.random()};
+state.items.push(item);state.opened++;save();render();
+document.getElementById('rewardArt').textContent=reward.art;
+document.getElementById('rewardName').textContent=reward.name;
+document.getElementById('rewardRarity').textContent=reward.rarity;
+document.getElementById('rewardText').textContent='Ты открыл '+chest+'. Предмет добавлен в коллекцию!';
+document.getElementById('modal').classList.add('show');
+if(tg)tg.HapticFeedback?.notificationOccurred('success');
+}
+function claimDaily(){
+const today=new Date().toISOString().slice(0,10);
+if(state.lastDaily===today)return;
+state.coins+=200;state.lastDaily=today;save();render();
+if(tg)tg.HapticFeedback?.notificationOccurred('success');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function showPage(id,button){
+document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+button.classList.add('active');
+}
+render();
+</script>
+</body>
+</html>
